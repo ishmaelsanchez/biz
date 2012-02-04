@@ -233,28 +233,28 @@ function biz_install() {
   variable_set('user_picture_dimensions', '1024x1024');
   variable_set('user_picture_file_size', '800');
   variable_set('user_picture_style', 'thumbnail');
-  
+
   // Cache GA code by default
   variable_set('googleanalytics_cache', 1);
-  
+
   // Set default day as Monday
   variable_set('date_first_day', '1');
-  
+
   // Disable user configurable timezones
   variable_set('configurable_timezones', 0);
 
   // Move admin toolbar to default to bottom right
   //variable_set('admin_toolbar', 'position'); se
-  
+
   // Set pathauto defaults to node title
   variable_set('pathauto_node_pattern', '[node:title]');
-  
+
   // Set pathauto defaults for user patterns
   variable_set('pathauto_user_pattern', 'user/[user:name]');
-  
+
   // Set search engines to submit to
-  //variable_set('xmlsitemap_engines_engines'); Array([0] => bing[1] => google)
-  
+  variable_set('xmlsitemap_engines_engines', array('bing', 'google'));
+
   // Set XML sitemap minimum
   variable_set('xmlsitemap_engines_minimum_lifetime', '604800');
 
@@ -385,18 +385,18 @@ function biz_install() {
   $filtered_html_permission = filter_permission_name($filtered_html_format);
   user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content', 'access comments', $filtered_html_permission));
   user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', 'access comments', 'post comments', 'skip comment approval', $filtered_html_permission));
-  
+
   // Build an array of user roles
   $roles = array('editor', 'manager', 'administrator');
-  
-  // Loop thru and build 
+
+  // Loop thru and build
   foreach($roles AS $role) {
     $user_role = new stdClass();
     $user_role->name = $role;
     user_role_save($user_role);
     var_dump($user_role);
   }
-  
+
   // @TODO fix code below since we are creating more than the admin role
   user_role_grant_permissions($admin_role->rid, array_keys(module_invoke_all('permission')));
   // Set this as the administrator role.
@@ -406,7 +406,7 @@ function biz_install() {
   db_insert('users_roles')
     ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
     ->execute();
-  // @TODO not working 
+  // @TODO not working
   // Create links in the main menu.
   $item = array(
     'link_title' => st('Home'),
@@ -436,7 +436,7 @@ function biz_install() {
   variable_set('admin_theme', 'rubik');
   variable_set('node_admin_theme', '1');
   variable_set('theme_default', 'seven');
-  
+
   // @TODO set filtered and full HTML to use TinyMCE
   // @TODO all content types for XML sitemap to be enabled by default
   // Pass an array to variabel_set

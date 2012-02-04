@@ -23,7 +23,7 @@ dependencies[] = field_ui
 dependencies[] = file
 dependencies[] = rdf
 
-; Sub core modules
+; Enable contrib modules
 dependencies[] = admin_menu
 dependencies[] = admin
 dependencies[] = context
