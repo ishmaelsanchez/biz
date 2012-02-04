@@ -433,9 +433,17 @@ function biz_install() {
     ->condition('type', 'theme')
     ->condition('name', 'rubik')
     ->execute();
+  // Enable the seven theme.
+  db_update('system')
+    ->fields(array('status' => 1))
+    ->condition('type', 'theme')
+    ->condition('name', 'seven')
+    ->execute();
   variable_set('admin_theme', 'rubik');
   variable_set('node_admin_theme', '1');
   variable_set('theme_default', 'seven');
+
+
 
   // @TODO set filtered and full HTML to use TinyMCE
   // @TODO all content types for XML sitemap to be enabled by default
