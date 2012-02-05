@@ -110,12 +110,12 @@ projects[mollom][subdir] = "contrib"
 
 
 ; SEO ==========================================================================
-;projects[globalredirect][type] = "module"
-;projects[globalredirect][subdir] = "contrib"
-;projects[googleanalytics][type] = "module"
-;projects[googleanalytics][subdir] = "contrib"
-projects[metatag][type] = "modules"
-projects[metatag][subdir] = "contrib"
+projects[globalredirect][type] = "module"
+projects[globalredirect][subdir] = "contrib"
+projects[google_analytics][type] = "module"
+projects[google_analytics][subdir] = "contrib"
+;projects[metatag][type] = "modules"
+;projects[metatag][subdir] = "contrib"
 projects[pathauto][type] = "module"
 projects[pathauto][subdir] = "contrib"
 projects[page_title][type] = "module"
