@@ -110,10 +110,10 @@ projects[mollom][subdir] = "contrib"
 
 
 ; SEO ==========================================================================
-projects[globalredirect][type] = "module"
-projects[globalredirect][subdir] = "contrib"
-projects[googleanalytics][type] = "module"
-projects[googleanalytics][subdir] = "contrib"
+;projects[globalredirect][type] = "module"
+;projects[globalredirect][subdir] = "contrib"
+;projects[googleanalytics][type] = "module"
+;projects[googleanalytics][subdir] = "contrib"
 projects[metatag][type] = "modules"
 projects[metatag][subdir] = "contrib"
 projects[pathauto][type] = "module"
