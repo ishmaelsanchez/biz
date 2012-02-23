@@ -155,7 +155,7 @@ projects[adaptivetheme][type] = "theme"
 projects[ninesixty][type] = "theme"
 projects[omega][type] = "theme"
 projects[rubik][type] = "theme"
-projects[tao][type] = "theme"
+;projects[tao][type] = "theme"
 
 
 ; Third party libraries ========================================================
