@@ -66,7 +66,7 @@ projects[menu_block][type] = "module"
 projects[menu_block][subdir] = "contrib"
 
 
-; 0ther ========================================================================
+; Other ========================================================================
 projects[addtoany][type] = "module"
 projects[addtoany][subdir] = "contrib"
 
@@ -114,8 +114,8 @@ projects[globalredirect][type] = "module"
 projects[globalredirect][subdir] = "contrib"
 projects[google_analytics][type] = "module"
 projects[google_analytics][subdir] = "contrib"
-;projects[metatag][type] = "modules"
-;projects[metatag][subdir] = "contrib"
+projects[metatag][type] = "modules"
+projects[metatag][subdir] = "contrib"
 projects[pathauto][type] = "module"
 projects[pathauto][subdir] = "contrib"
 projects[page_title][type] = "module"
