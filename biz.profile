@@ -27,9 +27,6 @@ function biz_form_install_configure_form_alter(&$form, $form_state) {
   $form['server_settings']['site_default_country']['#default_value'] = 'US';
   $form['server_settings']['date_default_timezone']['#default_value'] = 'America/Los Angeles';
   
-  // Remove email noticiations
-  unset($form['update_notifications']['update_status_module']['2']);
-  
   // Many modules set messages during installation we reset them
   drupal_get_messages('status');
   drupal_get_messages('warning');
