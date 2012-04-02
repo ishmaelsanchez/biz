@@ -82,6 +82,9 @@ projects[nodeblock][subdir] = "contrib"
 projects[token][type] = "module"
 projects[token][subdir] = "contrib"
 
+project[module_filter][type] = "module"
+project[module_filter][type] = "contrib"
+
 ; projects[securepages][type] = "module"
 ; projects[securepages][subdir] = "contrib"
 

@@ -21,7 +21,7 @@ dependencies[] = dblog
 dependencies[] = search
 dependencies[] = field_ui
 dependencies[] = file
-dependencies[] = rdf
+;dependencies[] = rdf
 
 ; Enable contrib modules
 dependencies[] = admin_menu
@@ -37,11 +37,12 @@ dependencies[] = imce_wysiwyg
 dependencies[] = link
 dependencies[] = login_destination
 dependencies[] = nodeblock
-;dependencies[] = metatag
+dependencies[] = module_filter
 dependencies[] = pathauto
 dependencies[] = token
 dependencies[] = views
 dependencies[] = views_ui
+dependencies[] = weform
 dependencies[] = wysiwyg
 dependencies[] = xmlsitemap
 dependencies[] = xmlsitemap_node

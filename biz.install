@@ -173,7 +173,7 @@ function biz_install() {
       'type' => 'page',
       'name' => st('Page'),
       'base' => 'node_content',
-      'description' => st("Use <em>basic pages</em> for your static content, such as an 'About us' page."),
+      'description' => st("Use <strong>basic pages</strong> for your static content, like a 'About us' page."),
       'custom' => 1,
       'modified' => 1,
       'locked' => 0,
@@ -182,7 +182,7 @@ function biz_install() {
       'type' => 'article',
       'name' => st('Article'),
       'base' => 'node_content',
-      'description' => st('Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'),
+      'description' => st('Use <strong>articles</strong> for time-sensitive content like news, press releases or blog posts.'),
       'custom' => 1,
       'modified' => 1,
       'locked' => 0,
@@ -239,18 +239,24 @@ function biz_install() {
   // Cache GA code by default
   variable_set('googleanalytics_cache', 1);
 
-  // Set default day as Monday
+  // Set date stuff
   variable_set('date_first_day', '1');
+  variable_set('date_format_long', 'D, F j, Y');
+  variable_set('date_format_medium', 'F j, Y');
+  variable_set('date_format_short', 'M j, Y');
 
   // Disable user configurable timezones
   variable_set('configurable_timezones', 0);
 
   // Move admin toolbar to default to bottom right
-  //variable_set('admin_toolbar', 'position'); se
+  variable_set('admin_toolbar', array('vertical', 'se', 'df'));
 
   // Set pathauto defaults to node title
   variable_set('pathauto_node_pattern', '[node:title]');
-
+  
+  // Set cron
+  variable_set('cron_safe_threshold', '43200');
+  
   // Set pathauto defaults for user patterns
   variable_set('pathauto_user_pattern', 'user/[user:name]');
 
@@ -396,7 +402,7 @@ function biz_install() {
     $user_role = new stdClass();
     $user_role->name = $role;
     user_role_save($user_role);
-    //var_dump($user_role);
+    var_dump($user_role);
   }
 
   // @TODO fix code below since we are creating more than the admin role
@@ -408,8 +414,7 @@ function biz_install() {
   //db_insert('users_roles')
   //  ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
   //  ->execute();
-  // @TODO not working
-  // Create links in the main menu.
+  // @TODO it's not adding all the array items
   $item = array(
     'link_title' => st('Home'),
     'link_path' => '<front>',
@@ -444,10 +449,13 @@ function biz_install() {
   variable_set('admin_theme', 'rubik');
   variable_set('node_admin_theme', '1');
   variable_set('theme_default', 'seven');
-
-
+  
+  
+  db_update('wysiwyg')
+    ->fields(array('format' => 'filtered_html'))
+    ->fields(array('editor' => 'tinymce'))
+    ->execute();
 
   // @TODO set filtered and full HTML to use TinyMCE
   // @TODO all content types for XML sitemap to be enabled by default
-  // Pass an array to variabel_set
 }

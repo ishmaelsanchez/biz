@@ -108,4 +108,9 @@ function biz_client_form_submit($form, &$form_state) {
   db_insert('users_roles')
     ->fields(array('uid' => $account->uid, 'rid' => $role->rid))
     ->execute();
+  
+  // For good measure
+  drupal_flush_all_caches();
+  
+  drupal_cron_run();
 }
