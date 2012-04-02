@@ -402,7 +402,6 @@ function biz_install() {
     $user_role = new stdClass();
     $user_role->name = $role;
     user_role_save($user_role);
-    drupal_set_message($user_role);
   }
 
   // Set all permisions for admins
@@ -417,12 +416,6 @@ function biz_install() {
   // @TODO it's not adding all the array items
   $item = array(
     'link_title' => st('Home'),
-    'link_path' => '<front>',
-    'menu_name' => 'main-menu',
-    'link_title' => st('About'),
-    'link_path' => '<front>',
-    'menu_name' => 'main-menu',
-    'link_title' => st('Contact'),
     'link_path' => '<front>',
     'menu_name' => 'main-menu',
   );
@@ -456,6 +449,67 @@ function biz_install() {
     ->fields(array('editor' => 'tinymce'))
     ->execute();
 
-  // @TODO set filtered and full HTML to use TinyMCE
+    $filtered_settings = array(
+    'default' => 1,
+    'user_choose' => 0,
+    'show_toggle' => 1,
+    'theme' => 'advanced',
+    'language' => 'en',
+    'buttons' => array(
+      'default' => array(
+        'Bold' => 1,
+        'Italic' => 1,
+        'BulletedList' => 1,
+        'NumberedList' => 1,
+        'Link' => 1,
+        'Image' => 1,
+        'Source' => 1,
+        'HorizontalRule' => 1,
+        'Cut' => 1,
+        'Copy' => 1,
+        'Paste' => 1,
+        'PasteFromWord' => 1,
+        'Scayt' => 1,
+      ),
+    ),
+    'toolbar_loc' => 'top',
+    'toolbar_align' => 'left',
+    'path_loc' => 'bottom',
+    'resizing' => 1,
+    'verify_html' => 1,
+    'preformatted' => 0,
+    'convert_fonts_to_spans' => 1,
+    'remove_linebreaks' => 1,
+    'apply_source_formatting' => 0,
+    'paste_auto_cleanup_on_paste' => 0,
+    'block_formats' => 'p,h2,h3,h4',
+    'css_setting' => 'theme',
+    'css_path' => 0,
+    'css_classes' => 0,
+  );
+
+  $config = array(
+    'filtered_html' => array(
+      'format' => 'filtered_html',
+      'editor' => 'ckeditor',
+      'settings' => $filtered_settings,
+    ),
+    'plain_text' => array(
+      'format' => 'plain_text',
+      'editor' => '',
+      'settings' => '',
+    ),
+  );
+
+  foreach ($config as $record) {
+    db_merge('wysiwyg')
+      ->key(array('format' => $record['format']))
+      ->fields(array(
+        'editor' => $record['editor'],
+        'settings' => serialize($record['settings']),
+      ))
+      ->execute();
+  }
+  wysiwyg_profile_cache_clear();
   // @TODO all content types for XML sitemap to be enabled by default
 }
