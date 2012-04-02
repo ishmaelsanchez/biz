@@ -21,7 +21,7 @@ dependencies[] = dblog
 dependencies[] = search
 dependencies[] = field_ui
 dependencies[] = file
-;dependencies[] = rdf
+dependencies[] = rdf
 
 ; Enable contrib modules
 dependencies[] = admin_menu
