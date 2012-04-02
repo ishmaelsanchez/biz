@@ -83,7 +83,7 @@ projects[token][type] = "module"
 projects[token][subdir] = "contrib"
 
 project[module_filter][type] = "module"
-project[module_filter][type] = "contrib"
+project[module_filter][subdir] = "contrib"
 
 ; projects[securepages][type] = "module"
 ; projects[securepages][subdir] = "contrib"
@@ -163,9 +163,9 @@ projects[tao][type] = "theme"
 
 ; Third party libraries ========================================================
 libraries[tinymce][download][type] = get
-libraries[tinymce][download][url] = http://github.com/downloads/tinymce/tinymce/tinymce_3.4.7.zip
+libraries[tinymce][download][url] = https://github.com/downloads/tinymce/tinymce/tinymce_3.4.9.zip
 libraries[tinymce][directory_name] = tinymce
 
 libraries[colorbox][download][type] = get
-libraries[colorbox][download][url] = http://colorpowered.com/colorbox/colorbox.zip
+libraries[colorbox][download][url] = http://www.jacklmoore.com/colorbox/colorbox.zip
 libraries[colorbox][directory_name] = colorbox
