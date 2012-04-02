@@ -7,6 +7,7 @@
 function system_form_install_select_profile_form_alter(&$form, $form_state) {
   // Hide default drupal profiles
   unset($form['profile']['Standard']);
+  unset($form['profile']['Minimal']);
 }
 
 /**
@@ -54,9 +55,7 @@ function biz_install_tasks() {
   return $tasks;
 }
 
-/**
- * Implements hook_install_tasks().
- * 
+/** 
  * Custom form for additional configuration
  */
 function biz_client_form() {
@@ -116,6 +115,5 @@ function biz_client_form_submit($form, &$form_state) {
   
   // For good measure
   drupal_flush_all_caches();
-  
   drupal_cron_run();
 }

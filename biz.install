@@ -402,18 +402,18 @@ function biz_install() {
     $user_role = new stdClass();
     $user_role->name = $role;
     user_role_save($user_role);
-    var_dump($user_role);
+    drupal_set_message($user_role);
   }
 
-  // @TODO fix code below since we are creating more than the admin role
-  //user_role_grant_permissions($admin_role->rid, array_keys(module_invoke_all('permission')));
+  // Set all permisions for admins
+  user_role_grant_permissions($user_role->administrator, array_keys(module_invoke_all('permission')));
   // Set this as the administrator role.
-  //variable_set('user_admin_role', $admin_role->rid);
+  variable_set('user_admin_role', $user_role->administrator);
 
   // Assign user 1 the "administrator" role.
-  //db_insert('users_roles')
-  //  ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
-  //  ->execute();
+  db_insert('users_roles')
+    ->fields(array('uid' => 1, 'rid' => $user_role->administrator))
+    ->execute();
   // @TODO it's not adding all the array items
   $item = array(
     'link_title' => st('Home'),
