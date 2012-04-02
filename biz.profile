@@ -6,7 +6,7 @@
  */
 function system_form_install_select_profile_form_alter(&$form, $form_state) {
   // Hide default drupal profiles
-  //unset($form['profile']['Standard']);
+  unset($form['profile']['Standard']);
 }
 
 /**
@@ -30,8 +30,16 @@ function biz_form_install_configure_form_alter(&$form, $form_state) {
   // Remove email noticiations
   unset($form['update_notifications']['update_status_module']['2']);
   
-  //// Unset the timezone detect stuff
+  // Many modules set messages during installation we reset them
+  drupal_get_messages('status');
+  drupal_get_messages('warning');
+  
+  // Unset the timezone detect stuff
   //unset($form['server_settings']['date_default_timezone']['#attributes']['class']);
+
+  // Opt out of e-mail notifications 
+  $form['update_notifications']['update_status_module']["#default_value"]['1'] = '0';
+ 
 }
 
 /**
