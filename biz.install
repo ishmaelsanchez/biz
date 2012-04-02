@@ -398,20 +398,22 @@ function biz_install() {
   $roles = array('editor', 'manager', 'administrator');
 
   // Loop thru and build
-  foreach($roles AS $role) {
+  foreach($roles AS $key => $role) {
     $user_role = new stdClass();
     $user_role->name = $role;
     user_role_save($user_role);
   }
-
+  // Set variable for admin role, RID set by order created user role
+  $admin_rid = '2'; 
+ 
   // Set all permisions for admins
-  user_role_grant_permissions($user_role->administrator, array_keys(module_invoke_all('permission')));
+  user_role_grant_permissions($admin_rid, array_keys(module_invoke_all('permission')));
   // Set this as the administrator role.
-  variable_set('user_admin_role', $user_role->administrator);
+  variable_set('user_admin_role', $admin_rid);
 
   // Assign user 1 the "administrator" role.
   db_insert('users_roles')
-    ->fields(array('uid' => 1, 'rid' => $user_role->administrator))
+    ->fields(array('uid' => 1, 'rid' => $admin_rid))
     ->execute();
   // @TODO it's not adding all the array items
   $item = array(
