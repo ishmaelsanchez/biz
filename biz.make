@@ -5,9 +5,6 @@ api = 2
 ; Modules ======================================================================
 
 ; Admin ========================================================================
-projects[admin][type] = "module"
-projects[admin][subdir] = "contrib"
-
 projects[admin_menu][type] = "module"
 projects[admin_menu][subdir] = "contrib"
 
@@ -24,9 +21,8 @@ projects[context][subdir] = "contrib"
 ; projects[calendar][type] = "module"
 ; projects[calendar][subdir] = "contrib"
 
-; projects[date][type] = "module"
-; projects[date][subdir] = "contrib"
-
+projects[date][type] = "module"
+projects[date][subdir] = "contrib"
 
 ; Development ==================================================================
 projects[devel][type] = "module"
@@ -35,19 +31,22 @@ projects[devel][subdir] = "contrib"
 projects[backup_migrate][type] = "module"
 projects[backup_migrate][subdir] = "contrib"
 
+; Display ======================================================================
+; projects[ds][type] = "module"
+; projects[ds][subdir] = "contrib"
+
+; projects[livethemer][type] = "module"
+; projects[livethemer][subdir] = "contrib"
 
 ; Features =====================================================================
-projects[features][type] = "module"
-projects[features][subdir] = "contrib"
+; projects[features][type] = "module"
+; projects[features][subdir] = "contrib"
 
-projects[strongarm][type] = "module"
-projects[strongarm][subdir] = "contrib"
+; projects[strongarm][type] = "module"
+; projects[strongarm][subdir] = "contrib"
 
 
 ; Field related ================================================================
-projects[ds][type] = "module"
-projects[ds][subdir] = "contrib"
-
 projects[field_group][type] = "module"
 projects[field_group][subdir] = "contrib"
 
@@ -59,8 +58,11 @@ projects[feeds][subdir] = "contrib"
 
 
 ; Menu =========================================================================
-projects[nice_menus][type] = "module"
-projects[nice_menus][subdir] = "contrib"
+;projects[nice_menus][type] = "module"
+;projects[nice_menus][subdir] = "contrib"
+
+projects[superfish][type] = "module"
+projects[superfish][subdir] = "contrib"
 
 projects[menu_block][type] = "module"
 projects[menu_block][subdir] = "contrib"
@@ -70,11 +72,20 @@ projects[menu_block][subdir] = "contrib"
 projects[addtoany][type] = "module"
 projects[addtoany][subdir] = "contrib"
 
+projects[entity][type] = "module"
+projects[entity][subdir] = "contrib"
+
+; office hours
+
+; Social media
+projects[socialmedia][type] = module
+projects[socialmedia][subdir] = contrib
+
 projects[colorbox][type] = module
 projects[colorbox][subdir] = contrib
 
-projects[login_destination][type] = "module"
-projects[login_destination][subdir] = "contrib"
+projects[logintoboggan][type] = "module"
+projects[logintoboggan][subdir] = "contrib"
 
 projects[nodeblock][type] = "module"
 projects[nodeblock][subdir] = "contrib"
@@ -121,8 +132,6 @@ projects[google_analytics][subdir] = "contrib"
 ; projects[metatag][subdir] = "contrib"
 projects[pathauto][type] = "module"
 projects[pathauto][subdir] = "contrib"
-projects[page_title][type] = "module"
-projects[page_title][subdir] = "contrib"
 projects[xmlsitemap][type] = "module"
 projects[xmlsitemap][subdir] = "contrib"
 
@@ -154,10 +163,9 @@ projects[imce_wysiwyg][subdir] = "contrib"
 
 
 ; Themes =======================================================================
-projects[adaptivetheme][type] = "theme"
-projects[ninesixty][type] = "theme"
 projects[rubik][type] = "theme"
 projects[tao][type] = "theme"
+projects[zen][type] = "theme"
 
 
 ; Third party libraries ========================================================

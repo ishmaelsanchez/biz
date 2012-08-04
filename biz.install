@@ -1,4 +1,7 @@
 <?php
+// @TODO set text formats based on user /content/formats
+// @TODO IMCE for user
+// @TODO logintobbagin set up
 
 /**
  * Implements hook_install().
@@ -8,6 +11,305 @@
 function biz_install() {
   // You could just include the minimal install profile
   // include_once DRUPAL_ROOT . '/profiles/minimal/minimal.install';
+  biz_set_vars();
+  biz_set_text_formats();
+  biz_set_fields_types();
+  biz_set_perm_roles();
+  biz_set_blocks();
+  biz_set_nodes_links();
+}
+
+/**
+ * Defines variables for nodes and contrib modules
+ */
+function biz_set_vars() {
+  // Default page not promoted and comments disabled.
+  variable_set('node_options_page', array('status'));
+  variable_set('comment_page', COMMENT_NODE_HIDDEN);
+  
+  // Block and webform content not promoted and comments disabled.
+  variable_set('node_options_block', array('status'));
+  variable_set('comment_block', COMMENT_NODE_HIDDEN);
+  variable_set('comment_webform', COMMENT_NODE_HIDDEN);
+
+  // Default articles and webforms not promoted
+  variable_set('node_options_article', array('status'));
+  variable_set('node_options_webform', array('status'));
+  
+  // Don't display date and author information page, block, webform nodes.
+  variable_set('node_submitted_page', FALSE);
+  variable_set('node_submitted_block', FALSE);
+  variable_set('node_submitted_webform', FALSE);
+
+  // No user picture support and set the default to a square thumbnail option.
+  variable_set('user_pictures', '0');
+  variable_set('user_picture_dimensions', '1024x1024');
+  variable_set('user_picture_file_size', '800');
+  variable_set('user_picture_style', 'thumbnail');
+
+  // Cache GA code by default
+  variable_set('googleanalytics_cache', 1);
+
+  // Disable user configurable timezones
+  variable_set('configurable_timezones', 0);
+
+  // Move admin toolbar to bottom right
+  variable_set('admin_toolbar', array('layout' => 'vertical', 'position' => 'se'));
+
+  // Set pathauto defaults to node title
+  variable_set('pathauto_node_pattern', '[node:title]');
+  
+  // Set pathauto defaults for user patterns
+  variable_set('pathauto_user_pattern', 'user/[user:name]');
+  
+  // Set cron
+  variable_set('cron_safe_threshold', '43200');
+
+  // Set search engines to submit to
+  variable_set('xmlsitemap_engines_engines', array('bing', 'google'));
+
+  // Set XML sitemap minimum
+  variable_set('xmlsitemap_engines_minimum_lifetime', '604800');
+  
+  // Include pages and articles in sitemap
+  variable_set('xmlsitemap_settings_node_page', array('status' => 1, 'priority' => 0.5));
+  variable_set('xmlsitemap_settings_node_article', array('status' => 1, 'priority' => 0.5));
+  
+  // Allow visitor account creation with administrative approval.
+  // variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
+  
+  // Disable user register.
+  variable_set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
+  
+  variable_set('admin_theme', 'rubik');
+  variable_set('node_admin_theme', '1');
+  variable_set('theme_default', 'seven');
+  
+  // Add new date options to be set as vars below
+  $values = array(
+    array(
+      'format' => 'M j, Y',
+      'type'  => 'short',
+      'locked' => '0'
+    ),
+    array(
+      'format' => 'F j, Y',
+      'type' => 'medium',
+      'locked' => '0'
+    ),
+    array(
+      'format' => 'D, F j, Y',
+      'type' => 'long',
+      'locked' => '0'
+    ),
+  );
+  $query = db_insert('date_formats')->fields(array('format', 'type', 'locked'));
+  
+  foreach ($values as $record) {
+    $query->values($record);   
+  } 
+  $query->execute();
+  
+  variable_set('date_first_day', '1');
+  variable_set('date_format_long', 'D, F j, Y');
+  variable_set('date_format_medium', 'F j, Y');
+  variable_set('date_format_short', 'M j, Y');
+  
+  // Set pages: home and 
+  variable_set('site_frontpage', 'node/1');
+}
+
+/**
+ * Set up user roles and permissions
+ */
+function biz_set_perm_roles() {
+  
+  // MAKE Sure you aren't setting perms for disabled modules otherwise you get
+  // Integrity constraint violation: 1048 Column 'module' cannot be null
+  
+  // Use below for seeing perms for each role
+  // SELECT r.name,p.module,p.permission 
+  // FROM role_permission p left join role r on p.rid=r.rid 
+  // order by name,module, permission;
+
+
+  // Set perms for default roles
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content', 'search content'));
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', 'search content'));
+  
+  // Create role for admins with all available permissions assigned.
+  $admin_role = new stdClass();
+  $admin_role->name = 'administrator';
+  $admin_role->weight = 4;
+  user_role_save($admin_role);
+  user_role_grant_permissions($admin_role->rid, array_keys(module_invoke_all('permission')));
+  // Set this as the admin role.
+  variable_set('user_admin_role', $admin_role->rid);
+
+  // Assign user 1 as an admin
+  db_insert('users_roles')
+    ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
+    ->execute();
+  
+    // Create role for editors
+  $role = new stdClass();
+  $role->name = 'editor';
+  $role->weight = 2;
+  user_role_save($role);
+
+  $permissions = array(
+    'use admin toolbar',
+    'access administration menu',
+    'access comments',
+//    'administer comments',
+//    'edit own comment',
+//    'post comments',
+//    'skip comment approval',
+    'use text format filtered_html',
+    'access content overview',
+    'create article content',
+    'create block content',
+    'create page content',
+    'edit any article content',
+    'edit any page content',
+    'edit own article content',
+    'edit own block content',
+    'edit own page content',
+    'revert revisions',
+    'view own unpublished content',
+    'view revisions',
+    'search content',
+    'use advanced search',
+//    'access administration page',
+    'view the administration theme',
+    'access own webform results',
+    'access own webform submissions',
+  );
+  user_role_grant_permissions($role->rid, $permissions);
+  
+  // Create manager role with some sensible defaults
+  $manager_role = new stdClass();
+  $manager_role->name = 'manager';
+  $manager_role->weight = 3;
+  user_role_save($manager_role);
+  
+  $permissions = array(
+    'use admin toolbar',
+    'access administration menu',
+    'access comments',
+//    'administer comments',
+//    'edit own comment',
+//    'post comments',
+//    'skip comment approval',
+    'use text format full_html',
+    'access content overview',
+    'create article content',
+    'create block content',
+    'create page content',
+    'edit any article content',
+    'edit any page content',
+    'edit own article content',
+    'edit own block content',
+    'edit own page content',
+    'revert revisions',
+    'view own unpublished content',
+    'view revisions',
+    'search content',
+    'use advanced search',
+//    'access administration page',
+    'view the administration theme',
+    'access own webform results',
+    'access own webform submissions',
+    'delete own webform submissions',
+  );
+  user_role_grant_permissions($manager_role->rid, $permissions);
+  
+}
+
+function biz_set_nodes_links() {
+  $default_nodes = array();
+  
+  // Create default nodes
+  $default_nodes[] = array( 
+    'title' => st('Home'),
+    'node_body' => st('<p>DEFAULT TEXT:</p> Change this text after install.'),
+    'link_path' => st('home'),
+  );
+  $default_nodes[] = array( 
+    'title' => st('About'),
+    'node_body' => st('<p>DEFAULT TEXT:</p> Our company delivers superior services by giving our customers great results in a short time and at an affordable price.'),
+    'link_path' => st('about'),
+  );
+  $default_nodes[] = array( 
+    'title' => st('Services'),
+    'node_body' => st('<p>DEFAULT TEXT:</p> A professional atmosphere without the pretentious mood.'),
+    'link_path' => st('services'),
+  );
+  $default_nodes[] = array( 
+    'title' => st('Contact'),
+    'node_body' => st('<p>DEFAULT TEXT:</p> Use the form below to contact us.'),
+    'link_path' => st('contact'),
+  );
+  
+  foreach ($default_nodes as $key => $value) {
+    $node = new stdClass();
+    $node->type = 'page';
+    node_object_prepare($node);
+
+    $node->uid = 1;
+    $node->name = 'admin';
+    $node->title = $value['title'];
+    $node->language = 'und';
+    $node->body['und']['0']['value'] = $value['node_body'];
+    $node->body['und']['0']['format'] = 'full_html';
+
+    $node->menu = array(
+      'enabled' => 1,
+      'mlid' => 0,
+      'module' => 'menu',
+      'hidden' => 0,
+      'has_children' => 0,
+      'options' => array(),
+      'expanded' => 0,
+      'parent_depth_limit' => 8,
+      'link_title' => $value['title'],
+      'link_path' => $value['link_path'],
+      'description' => '',
+      'parent' => 'main-menu:0',
+      'weight' => 0,
+      'plid' => 0,
+      'menu_name' => 'main-menu'
+    );
+
+    $node->path['alias'] = $value['link_path'];
+    $node->comment = 0;
+    $node->status = 1;
+    $node->revision = 0;
+    $node->log = 'Programmatically created: ' . date('D, F j, Y');
+    $node->changed = $_SERVER['REQUEST_TIME'];
+    $node->created = $_SERVER['REQUEST_TIME'];
+
+    node_submit($node);
+    node_save($node);
+  }
+  
+  $menu_items = array();
+  
+  // Create main menu links
+  $menu_items[] = array(
+    'link_title' => 'Schedule',
+    'link_path' => '<front>',
+    'weight' => 3,
+    'menu_name' => 'main-menu');
+
+  foreach ($menu_items as $menu_item) {
+    menu_link_save($menu_item);
+  }
+
+  menu_cache_clear_all();
+}
+
+function biz_set_text_formats() {
   // Add text formats.
   $filtered_html_format = array(
     'format' => 'filtered_html',
@@ -64,9 +366,147 @@ function biz_install() {
   $full_html_format = (object) $full_html_format;
   filter_format_save($full_html_format);
 
-  // Enable some blocks.
+  $filtered_settings = array(
+    'default' => 1,
+    'user_choose' => 0,
+    'show_toggle' => 1,
+    'theme' => 'advanced',
+    'language' => 'en',
+    'buttons' => array(
+      'default' => array(
+        'bold' => 1,
+        'italic' => 1,
+        'justifyleft' => 1,
+        'justifycenter' => 1,
+        'justifyright' => 1,
+        'bullist' => '1',
+        'numlist' => 1,
+        'outdent' => 1,
+        'indent' => 1,
+        'blockquote' => 1,
+      ),
+    ),
+    'toolbar_loc' => 'top',
+    'toolbar_align' => 'left',
+    'path_loc' => 'bottom',
+    'resizing' => 1,
+    'verify_html' => 1,
+    'preformatted' => 0,
+    'convert_fonts_to_spans' => 1,
+    'remove_linebreaks' => 1,
+    'apply_source_formatting' => 0,
+    'paste_auto_cleanup_on_paste' => 1,
+    'block_formats' => 'p,h2,h3,h4',
+    'css_setting' => 'none',
+    'css_path' => NULL,
+    'css_classes' => NULL,
+  );
+  
+  $full_settings = array(
+    'default' => 1,
+    'user_choose' => 0,
+    'show_toggle' => 1,
+    'theme' => 'advanced',
+    'language' => 'en',
+    'buttons' => array(
+      'default' => array(
+        'bold' => 1,
+        'italic' => 1,
+        'strikethrough' => 1,
+        'justifyleft' => 1,
+        'justifycenter' => 1,
+        'justifyright' => 1,
+        'bullist' => '1',
+        'numlist' => 1,
+        'outdent' => 1,
+        'indent' => 1,
+        'undo' => 1,
+        'redo' => 1,
+        'link' => 1,
+        'unlink' => 1,
+        'image' => 1,
+        'sup' => 1,
+        'hr' => 1,
+        'cut' => 1,
+        'copy' => 1,
+        'paste' => 1,
+        'removeformat' => 1,
+        'blockquote' => 1,
+      ),
+      'advimage' => array('advimage' => 1),
+      'advlink' => array('advlink' => 1),
+      'paste' => array('pasteword' => 1, 'pastetext' => '1'),
+      'table' => array('tablecontrols' => 1),
+      'media' => array('media' => 1),
+      'xhtmlextras' => array('cite' => 1),
+      'imce' => array('imce' => 1),
+      'drupal' => array('break' => 1),
+    ),
+    'toolbar_loc' => 'top',
+    'toolbar_align' => 'left',
+    'path_loc' => 'bottom',
+    'resizing' => 1,
+    'verify_html' => 1,
+    'preformatted' => 0,
+    'convert_fonts_to_spans' => 1,
+    'remove_linebreaks' => 1,
+    'apply_source_formatting' => 0,
+    'paste_auto_cleanup_on_paste' => 1,
+    'block_formats' => 'p,h2,h3,h4',
+    'css_setting' => 'none',
+    'css_path' => NULL,
+    'css_classes' => NULL,
+  );
+  
+  $wysiwyg_config = array(
+    'full_html' => array(
+      'format' => 'full_html',
+      'editor' => 'tinymce',
+      'settings' => $full_settings,
+    ),
+    'filtered_html' => array(
+      'format' => 'filtered_html',
+      'editor' => 'tinymce',
+      'settings' => $filtered_settings,
+    ),
+    'plain_text' => array(
+      'format' => 'plain_text',
+      'editor' => '',
+      'settings' => '',
+    ),
+  );
+
+  foreach ($wysiwyg_config as $record) {
+    db_merge('wysiwyg')
+      ->key(array('format' => $record['format']))
+      ->fields(array(
+        'editor' => $record['editor'],
+        'settings' => serialize($record['settings']),
+      ))
+      ->execute();
+  }
+  wysiwyg_profile_cache_clear();
+  
+}
+
+function biz_set_blocks() {
+  // Disable Bartik theme.
+  db_update('system')
+    ->fields(array('status' => 0))
+    ->condition('type', 'theme')
+    ->condition('name', 'bartik')
+    ->execute();
+  
+  db_update('system')
+    ->fields(array('status' => 1))
+    ->condition('type', 'theme')
+    ->condition('name', 'seven')
+    ->execute();
+
   $default_theme = variable_get('theme_default', 'seven');
   $admin_theme = 'rubik';
+  
+  // Enable some blocks.
   $values = array(
     array(
       'module' => 'system',
@@ -79,36 +519,6 @@ function biz_install() {
       'cache' => -1,
     ),
     array(
-      'module' => 'search',
-      'delta' => 'form',
-      'theme' => $default_theme,
-      'status' => 1,
-      'weight' => -1,
-      'region' => 'sidebar_first',
-      'pages' => '',
-      'cache' => -1,
-    ),
-    array(
-      'module' => 'node',
-      'delta' => 'recent',
-      'theme' => $admin_theme,
-      'status' => 1,
-      'weight' => 10,
-      'region' => 'dashboard_main',
-      'pages' => '',
-      'cache' => -1,
-    ),
-    array(
-      'module' => 'system',
-      'delta' => 'navigation',
-      'theme' => $default_theme,
-      'status' => 1,
-      'weight' => 0,
-      'region' => 'sidebar_first',
-      'pages' => '',
-      'cache' => -1,
-    ),
-    array(
       'module' => 'system',
       'delta' => 'help',
       'theme' => $default_theme,
@@ -138,35 +548,35 @@ function biz_install() {
       'pages' => '',
       'cache' => -1,
     ),
-    array(
-      'module' => 'user',
-      'delta' => 'new',
-      'theme' => $admin_theme,
-      'status' => 1,
-      'weight' => 0,
-      'region' => 'dashboard_sidebar',
-      'pages' => '',
-      'cache' => -1,
-    ),
-    array(
-      'module' => 'search',
-      'delta' => 'form',
-      'theme' => $admin_theme,
-      'status' => 1,
-      'weight' => -10,
-      'region' => 'dashboard_sidebar',
-      'pages' => '',
-      'cache' => -1,
-    ),
   );
   $query = db_insert('block')->fields(array('module', 'delta', 'theme', 'status', 'weight', 'region', 'pages', 'cache'));
   foreach ($values as $record) {
     $query->values($record);
   }
   $query->execute();
+  
+  // Set default theme settings
+  variable_set('theme_rubik_settings', array(
+    'toggle_logo' => 1,
+    'toggle_name' => 1,
+    'toggle_slogan' => 0,
+    'toggle_node_user_picture' => 0,
+    'toggle_comment_user_picture' => 0,
+    'toggle_comment_user_verification' => 0,
+    'toggle_favicon' => 1,
+    'toggle_main_menu' => 1,
+    'toggle_secondary_menu' => 0,
+    'default_logo' => 0,
+    'logo_path' => 'profiles/biz/logo.png',
+    'logo_upload' => '',
+    'default_favicon' => 1,
+    'favicon_path' => '',
+    'favicon_upload' => '',
+  ));
+}
 
-  // Insert default pre-defined node types into the database. For a complete
-  // list of available node type attributes, refer to the node type API
+function biz_set_fields_types() {
+   // Insert default pre-defined node types into the database
   // documentation at: http://api.drupal.org/api/HEAD/function/hook_node_info.
   $types = array(
     array(
@@ -183,6 +593,15 @@ function biz_install() {
       'name' => st('Article'),
       'base' => 'node_content',
       'description' => st('Use <strong>articles</strong> for time-sensitive content like news, press releases or blog posts.'),
+      'custom' => 1,
+      'modified' => 1,
+      'locked' => 0,
+    ),
+    array(
+      'type' => 'block',
+      'name' => st('Block'),
+      'base' => 'node_content',
+      'description' => st('Use a <strong>block</strong> for small movable content like an address or trademark notice'),
       'custom' => 1,
       'modified' => 1,
       'locked' => 0,
@@ -222,52 +641,6 @@ function biz_install() {
   foreach ($rdf_mappings as $rdf_mapping) {
     rdf_mapping_save($rdf_mapping);
   }
-
-  // Default "Basic page" to not be promoted and have comments disabled.
-  variable_set('node_options_page', array('status'));
-  variable_set('comment_page', COMMENT_NODE_HIDDEN);
-
-  // Don't display date and author information for "Basic page" nodes by default.
-  variable_set('node_submitted_page', FALSE);
-
-  // Enable user picture support and set the default to a square thumbnail option.
-  variable_set('user_pictures', '1');
-  variable_set('user_picture_dimensions', '1024x1024');
-  variable_set('user_picture_file_size', '800');
-  variable_set('user_picture_style', 'thumbnail');
-
-  // Cache GA code by default
-  variable_set('googleanalytics_cache', 1);
-
-  // Set date stuff
-  variable_set('date_first_day', '1');
-  variable_set('date_format_long', 'D, F j, Y');
-  variable_set('date_format_medium', 'F j, Y');
-  variable_set('date_format_short', 'M j, Y');
-
-  // Disable user configurable timezones
-  variable_set('configurable_timezones', 0);
-
-  // Move admin toolbar to default to bottom right
-  variable_set('admin_toolbar', array('vertical', 'se', 'df'));
-
-  // Set pathauto defaults to node title
-  variable_set('pathauto_node_pattern', '[node:title]');
-  
-  // Set cron
-  variable_set('cron_safe_threshold', '43200');
-  
-  // Set pathauto defaults for user patterns
-  variable_set('pathauto_user_pattern', 'user/[user:name]');
-
-  // Set search engines to submit to
-  variable_set('xmlsitemap_engines_engines', array('bing', 'google'));
-
-  // Set XML sitemap minimum
-  variable_set('xmlsitemap_engines_minimum_lifetime', '604800');
-
-  // Allow visitor account creation with administrative approval.
-  variable_set('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
 
   // Create a default vocabulary named "Tags", enabled for the 'article' content type.
   $description = st('Use tags to group articles on similar topics into categories.');
@@ -388,130 +761,24 @@ function biz_install() {
     ),
   );
   field_create_instance($instance);
-
-  // Enable default permissions for system roles.
-  $filtered_html_permission = filter_permission_name($filtered_html_format);
-  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access content', 'access comments', $filtered_html_permission));
-  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('access content', 'access comments', 'post comments', 'skip comment approval', $filtered_html_permission));
-
-  // Build an array of user roles
-  $roles = array('editor', 'manager', 'administrator');
-
-  // Loop thru and build
-  foreach($roles AS $key => $role) {
-    $user_role = new stdClass();
-    $user_role->name = $role;
-    user_role_save($user_role);
-  }
-  // Set variable for admin role, RID set by order created user role
-  $admin_rid = '2'; 
- 
-  // Set all permisions for admins
-  user_role_grant_permissions($admin_rid, array_keys(module_invoke_all('permission')));
-  // Set this as the administrator role.
-  variable_set('user_admin_role', $admin_rid);
-
-  // Assign user 1 the "administrator" role.
-  db_insert('users_roles')
-    ->fields(array('uid' => 1, 'rid' => $admin_rid))
-    ->execute();
-  // @TODO it's not adding all the array items
-  $item = array(
-    'link_title' => st('Home'),
-    'link_path' => '<front>',
-    'menu_name' => 'main-menu',
-  );
-  menu_link_save($item);
-
-  // Update the menu router information.
-  menu_rebuild();
-
-  // Disable user register.
-  variable_set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
-
-  // Enable rubik as the admin theme.
-  db_update('system')
-    ->fields(array('status' => 1))
-    ->condition('type', 'theme')
-    ->condition('name', 'rubik')
-    ->execute();
-  // Enable the seven theme.
-  db_update('system')
-    ->fields(array('status' => 1))
-    ->condition('type', 'theme')
-    ->condition('name', 'seven')
-    ->execute();
-  variable_set('admin_theme', 'rubik');
-  variable_set('node_admin_theme', '1');
-  variable_set('theme_default', 'seven');
-  
-  
-  db_update('wysiwyg')
-    ->fields(array('format' => 'filtered_html'))
-    ->fields(array('editor' => 'tinymce'))
-    ->execute();
-
-    $filtered_settings = array(
-    'default' => 1,
-    'user_choose' => 0,
-    'show_toggle' => 1,
-    'theme' => 'advanced',
-    'language' => 'en',
-    'buttons' => array(
-      'default' => array(
-        'Bold' => 1,
-        'Italic' => 1,
-        'BulletedList' => 1,
-        'NumberedList' => 1,
-        'Link' => 1,
-        'Image' => 1,
-        'Source' => 1,
-        'HorizontalRule' => 1,
-        'Cut' => 1,
-        'Copy' => 1,
-        'Paste' => 1,
-        'PasteFromWord' => 1,
-        'Scayt' => 1,
-      ),
-    ),
-    'toolbar_loc' => 'top',
-    'toolbar_align' => 'left',
-    'path_loc' => 'bottom',
-    'resizing' => 1,
-    'verify_html' => 1,
-    'preformatted' => 0,
-    'convert_fonts_to_spans' => 1,
-    'remove_linebreaks' => 1,
-    'apply_source_formatting' => 0,
-    'paste_auto_cleanup_on_paste' => 0,
-    'block_formats' => 'p,h2,h3,h4',
-    'css_setting' => 'theme',
-    'css_path' => 0,
-    'css_classes' => 0,
-  );
-
-  $config = array(
-    'filtered_html' => array(
-      'format' => 'filtered_html',
-      'editor' => 'ckeditor',
-      'settings' => $filtered_settings,
-    ),
-    'plain_text' => array(
-      'format' => 'plain_text',
-      'editor' => '',
-      'settings' => '',
-    ),
-  );
-
-  foreach ($config as $record) {
-    db_merge('wysiwyg')
-      ->key(array('format' => $record['format']))
-      ->fields(array(
-        'editor' => $record['editor'],
-        'settings' => serialize($record['settings']),
-      ))
-      ->execute();
-  }
-  wysiwyg_profile_cache_clear();
-  // @TODO all content types for XML sitemap to be enabled by default
 }
+
+//function biz_install_tasks() {
+//  $task = array();
+//  $task['comment_notify'] = array(
+//    'display_name' => st('Install configurations for Comment Notify'),
+//    'display' => FALSE,
+//    'type' => 'normal',
+//    'run' => INSTALL_TASK_RUN_IF_REACHED,
+//    'function' => 'biz_configure_commentnotify',
+//  );
+//  return $task;
+//}
+
+// @TODO set XML inclusion on all content types
+//function biz_configure_commentnotify() {
+//  $content_types = array_combine(array_keys(node_type_get_types()), array_keys(node_type_get_types()));
+//  variable_set('comment_notify_node_types', $content_types);
+//}
+//
+
