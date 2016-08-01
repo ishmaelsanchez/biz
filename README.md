@@ -1,0 +1,1 @@
+Drupal 7 profile installation. Used as a starting point for my client work. The profile is all commonly used Drupal modules and sane module defaults and core module configuration for starting new client projects.
